@@ -17,6 +17,7 @@
 package org.apache.activemq.jms.pool;
 
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -233,6 +234,8 @@ public class PooledConnectionFactory implements ConnectionFactory, QueueConnecti
                 // pulling the rug out from under us.
                 while (connection == null) {
                     connection = connectionsPool.borrowObject(key);
+
+                    // if connection was expired before going next statement
                     synchronized (connection) {
                         if (connection.getConnection() != null) {
                             connection.incrementReferenceCount();
